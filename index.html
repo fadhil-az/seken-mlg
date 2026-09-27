@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Seken.mlg — Marketplace Barang Bekas Malang</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="navbar">
+    <div class="container nav-inner">
+      <button class="brand" onclick="showPage('home')">
+        <span class="brand-dot"></span>
+        <span>seken<span>.mlg</span></span>
+      </button>
+      <nav>
+        <button class="nav-link active" data-page="home" onclick="showPage('home')">Beranda</button>
+        <button class="nav-link" data-page="jual" onclick="showPage('jual')">Jual Barang</button>
+        <button class="nav-link" data-page="profil" onclick="showPage('profil')">Profil</button>
+      </nav>
+      <button class="point-btn" onclick="showPage('profil')">⭐ <span id="navPoints">120</span> COD Point</button>
+    </div>
+  </header>
+
+  <main>
+    <section id="home" class="page active">
+      <div class="hero">
+        <div class="container hero-grid">
+          <div>
+            <div class="pill">📍 Khusus area Malang</div>
+            <h1>Barang bekas yang masih layak,<br><span>dipertemukan lagi.</span></h1>
+            <p>Temukan barang preloved dengan harga terjangkau dari penjual di sekitar Malang. Lebih dekat, lebih praktis, lebih hemat.</p>
+            <div class="hero-actions">
+              <button class="primary" onclick="document.getElementById('products').scrollIntoView({behavior:'smooth'})">Cari Barang</button>
+              <button class="secondary" onclick="showPage('jual')">＋ Jual Barang</button>
+            </div>
+          </div>
+          <div class="hero-card">
+            <div class="hero-icon">♻️</div>
+            <h3>Reuse • Hemat • Lokal</h3>
+            <p>Seken.mlg mendukung pemanfaatan kembali barang yang masih layak digunakan di wilayah Malang.</p>
+            <div class="mini-stats">
+              <div><b>1.2K+</b><small>Barang</small></div>
+              <div><b>860+</b><small>Pengguna</small></div>
+              <div><b>Malang</b><small>Jangkauan</small></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="container content" id="products">
+        <div class="section-head">
+          <div>
+            <h2>Temukan Barang</h2>
+            <p>Cari barang bekas sesuai kebutuhanmu.</p>
+          </div>
+          <div class="search-box">
+            <span>⌕</span>
+            <input id="searchInput" oninput="renderProducts()" placeholder="Cari buku, sepatu, elektronik..." />
+          </div>
+        </div>
+
+        <div class="categories">
+          <button class="cat active" onclick="setCategory('Semua', this)">Semua</button>
+          <button class="cat" onclick="setCategory('Elektronik', this)">📱 Elektronik</button>
+          <button class="cat" onclick="setCategory('Buku', this)">📚 Buku</button>
+          <button class="cat" onclick="setCategory('Fashion', this)">👕 Fashion</button>
+          <button class="cat" onclick="setCategory('Kos', this)">🛏️ Perlengkapan Kos</button>
+        </div>
+
+        <div id="productGrid" class="product-grid"></div>
+      </div>
+    </section>
+
+    <section id="detail" class="page">
+      <div class="container content detail-wrap" id="detailContent"></div>
+    </section>
+
+    <section id="jual" class="page">
+      <div class="container content narrow">
+        <div class="page-title">
+          <div class="pill">📦 Pasang Barang</div>
+          <h2>Jual Barangmu</h2>
+          <p>Isi informasi barang dengan jelas agar calon pembeli mudah memahami kondisinya.</p>
+        </div>
+        <form class="form-card" onsubmit="submitProduct(event)">
+          <div class="form-grid">
+            <label>Nama Barang<input id="sellName" required placeholder="Contoh: Laptop ASUS"></label>
+            <label>Kategori
+              <select id="sellCategory" required>
+                <option value="">Pilih kategori</option><option>Elektronik</option><option>Buku</option><option>Fashion</option><option>Kos</option>
+              </select>
+            </label>
+            <label>Harga (Rp)<input id="sellPrice" type="number" required placeholder="150000"></label>
+            <label>Kondisi
+              <select id="sellCondition" required><option>Seperti Baru</option><option>Baik</option><option>Cukup Baik</option></select>
+            </label>
+            <label class="full">Lokasi COD<input id="sellLocation" required placeholder="Contoh: Lowokwaru, Malang"></label>
+            <label class="full">Deskripsi<textarea id="sellDesc" required placeholder="Jelaskan kondisi, kelengkapan, dan kekurangan barang..."></textarea></label>
+          </div>
+          <div class="upload">📷 <b>Upload foto</b><span> (prototype: simulasi upload)</span></div>
+          <button class="primary full-btn">Terbitkan Barang</button>
+        </form>
+      </div>
+    </section>
+
+    <section id="profil" class="page">
+      <div class="container content narrow">
+        <div class="profile-card">
+          <div class="avatar">FA</div>
+          <div class="profile-main"><span class="verified">✓ Pengguna terverifikasi</span><h2>Fadhil</h2><p>Malang, Jawa Timur</p><div class="rating">★★★★★ <b>4.9</b> · 24 transaksi</div></div>
+          <button class="secondary" onclick="alert('Fitur edit profil merupakan bagian prototype.')">Edit Profil</button>
+        </div>
+        <div class="stats-row">
+          <div><b>12</b><span>Barang Dijual</span></div><div><b>8</b><span>Barang Dibeli</span></div><div><b id="profilePoints">120</b><span>COD Point</span></div>
+        </div>
+        <div class="point-card">
+          <div><div class="point-big">⭐ <span id="pointBig">120</span></div><h3>COD Point</h3><p>Poin penghargaan dari aktivitas transaksi lokal di Seken.mlg.</p></div>
+          <button class="primary" onclick="addPoints()">Simulasi +10 Point</button>
+        </div>
+        <h2 class="subheading">Aktivitas Terbaru</h2>
+        <div class="activity"><span>🛍️</span><div><b>Berhasil membeli Buku Pemrograman Arduino</b><small>2 hari lalu · Lowokwaru</small></div><strong>+10 point</strong></div>
+        <div class="activity"><span>📦</span><div><b>Barang Laptop ASUS ditambahkan</b><small>5 hari lalu · Malang</small></div><strong>+5 point</strong></div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="container footer-inner">
+      <div><b>seken<span>.mlg</span></b><small>Marketplace barang bekas lokal Malang.</small></div>
+      <small>Prototype Manajemen Inovasi • 2026</small>
+    </div>
+  </footer>
+
+  <div id="toast" class="toast"></div>
+  <script src="script.js"></script>
+</body>
+</html>
