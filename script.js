@@ -2,7 +2,87 @@ let products = [];
 let currentCategory = "Semua";
 let points = 120;
 
-async function loadProducts() {
+async function submitProduct(event) {
+  event.preventDefault();
+
+  const {
+    data: { user }
+  } = await window.supabaseClient.auth.getUser();
+
+  if (!user) {
+    alert("Silakan login terlebih dahulu untuk menjual barang.");
+    window.location.href = "login.html";
+    return;
+  }
+
+  const name = document.getElementById("sellName").value;
+  const category = document.getElementById("sellCategory").value;
+  const price = document.getElementById("sellPrice").value;
+  const condition = document.getElementById("sellCondition").value;
+  const location = document.getElementById("sellLocation").value;
+  const description = document.getElementById("sellDesc").value;
+
+  // Mengambil foto
+  const imageInput = document.getElementById("sellImage");
+  const imageFile = imageInput.files[0];
+
+  let imageUrl = null;
+
+  // Upload foto ke Supabase Storage
+  if (imageFile) {
+
+    const fileExt = imageFile.name.split(".").pop().toLowerCase();
+    const fileName = `${user.id}/${Date.now()}.${fileExt}`;
+
+    const { error: uploadError } =
+      await window.supabaseClient.storage
+        .from("product-images")
+        .upload(fileName, imageFile);
+
+    if (uploadError) {
+      console.error("Upload foto gagal:", uploadError);
+      alert("Foto gagal di-upload: " + uploadError.message);
+      return;
+    }
+
+    // Mengambil URL foto
+    const { data: publicUrlData } =
+      window.supabaseClient.storage
+        .from("product-images")
+        .getPublicUrl(fileName);
+
+    imageUrl = publicUrlData.publicUrl;
+  }
+
+  // Simpan produk ke database
+  const { error } = await window.supabaseClient
+    .from("products")
+    .insert({
+      name: name,
+      category: category,
+      price: price,
+      condition: condition,
+      description: description,
+      location: location,
+      image_url: imageUrl,
+      seller_id: user.id,
+      seller_name: user.user_metadata?.name || user.email
+    });
+
+  if (error) {
+    console.error("Gagal menyimpan produk:", error);
+    alert("Barang gagal diterbitkan: " + error.message);
+    return;
+  }
+
+  alert("Barang dan foto berhasil diterbitkan!");
+
+  event.target.reset();
+
+  await loadProducts();
+
+  showPage("home");
+}
   const grid = document.getElementById("productGrid");
 
   grid.innerHTML = `
