@@ -162,10 +162,10 @@ document
     message.textContent = "Sedang masuk...";
 
     const { data, error } =
-        await supabase.auth.signInWithPassword({
-            email: email,
-            password: password
-        });
+    await window.supabaseClient.auth.signInWithPassword({
+        email: email,
+        password: password
+    });
 
     if (error) {
 
