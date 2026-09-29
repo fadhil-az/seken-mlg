@@ -1,141 +1,455 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Seken.mlg — Marketplace Barang Bekas Malang</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Seken.mlg - Jual Beli Barang Bekas</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #f5f7f6;
+            color: #222;
+        }
+
+        header {
+            background: white;
+            padding: 18px 7%;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .logo {
+            font-size: 25px;
+            font-weight: bold;
+            color: #16834b;
+        }
+
+        nav {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+        }
+
+        nav a {
+            text-decoration: none;
+            color: #333;
+        }
+
+        .btn-jual {
+            background: #16834b;
+            color: white;
+            padding: 10px 16px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .hero {
+            padding: 55px 7%;
+            text-align: center;
+        }
+
+        .hero h1 {
+            font-size: 36px;
+            margin-bottom: 12px;
+        }
+
+        .hero p {
+            color: #666;
+            margin-bottom: 25px;
+        }
+
+        .search-box {
+            max-width: 650px;
+            margin: auto;
+            display: flex;
+            gap: 10px;
+        }
+
+        .search-box input {
+            flex: 1;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            font-size: 15px;
+        }
+
+        .search-box button {
+            border: none;
+            background: #16834b;
+            color: white;
+            padding: 0 22px;
+            border-radius: 10px;
+            cursor: pointer;
+        }
+
+        .container {
+            width: 86%;
+            max-width: 1200px;
+            margin: auto;
+        }
+
+        .section-title {
+            margin-bottom: 20px;
+        }
+
+        .categories {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 40px;
+        }
+
+        .category {
+            background: white;
+            border: 1px solid #ddd;
+            padding: 10px 18px;
+            border-radius: 20px;
+            cursor: pointer;
+        }
+
+        .category:hover {
+            background: #16834b;
+            color: white;
+        }
+
+        .products {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 20px;
+            padding-bottom: 60px;
+        }
+
+        .product {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 3px 12px rgba(0,0,0,0.07);
+        }
+
+        .product-image {
+            height: 180px;
+            background: #e9eeeb;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #777;
+        }
+
+        .product-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .product-info {
+            padding: 16px;
+        }
+
+        .product-name {
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+
+        .price {
+            color: #16834b;
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+
+        .condition {
+            font-size: 13px;
+            color: #666;
+            margin-bottom: 6px;
+        }
+
+        .location {
+            font-size: 13px;
+            color: #777;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 30px;
+            color: #777;
+        }
+
+        .empty {
+            text-align: center;
+            padding: 40px;
+            color: #777;
+            grid-column: 1 / -1;
+        }
+
+        footer {
+            background: #16834b;
+            color: white;
+            text-align: center;
+            padding: 25px;
+        }
+
+        @media (max-width: 700px) {
+            header {
+                padding: 15px 5%;
+            }
+
+            nav {
+                gap: 10px;
+            }
+
+            .hero h1 {
+                font-size: 28px;
+            }
+
+            .search-box {
+                flex-direction: column;
+            }
+
+            .search-box button {
+                padding: 13px;
+            }
+        }
+    </style>
 </head>
+
 <body>
-  <header class="navbar">
-    <div class="container nav-inner">
-      <button class="brand" onclick="showPage('home')">
-        <span class="brand-dot"></span>
-        <span>seken<span>.mlg</span></span>
-      </button>
-      <nav>
-        <button class="nav-link active" data-page="home" onclick="showPage('home')">Beranda</button>
-        <button class="nav-link" data-page="jual" onclick="showPage('jual')">Jual Barang</button>
-        <button class="nav-link" data-page="profil" onclick="showPage('profil')">Profil</button>
-      </nav>
-      <button class="point-btn" onclick="showPage('profil')">⭐ <span id="navPoints">120</span> COD Point</button>
+
+<header>
+    <div class="logo">seken.mlg</div>
+
+    <nav>
+        <a href="index.html">Beranda</a>
+        <a href="login.html">Masuk</a>
+        <a href="register.html">Daftar</a>
+        <a href="jual.html" class="btn-jual">+ Jual Barang</a>
+    </nav>
+</header>
+
+<section class="hero">
+
+    <h1>Jual & Beli Barang Bekas</h1>
+
+    <p>
+        Temukan barang bekas berkualitas dengan harga terjangkau di Malang.
+    </p>
+
+    <div class="search-box">
+        <input
+            type="text"
+            id="searchInput"
+            placeholder="Cari buku, elektronik, pakaian..."
+        >
+
+        <button onclick="searchProducts()">
+            Cari
+        </button>
     </div>
-  </header>
 
-  <main>
-    <section id="home" class="page active">
-      <div class="hero">
-        <div class="container hero-grid">
-          <div>
-            <div class="pill">📍 Khusus area Malang</div>
-            <h1>Barang bekas yang masih layak,<br><span>dipertemukan lagi.</span></h1>
-            <p>Temukan barang preloved dengan harga terjangkau dari penjual di sekitar Malang. Lebih dekat, lebih praktis, lebih hemat.</p>
-            <div class="hero-actions">
-              <button class="primary" onclick="document.getElementById('products').scrollIntoView({behavior:'smooth'})">Cari Barang</button>
-              <button class="secondary" onclick="showPage('jual')">＋ Jual Barang</button>
-            </div>
-          </div>
-          <div class="hero-card">
-            <div class="hero-icon">♻️</div>
-            <h3>Reuse • Hemat • Lokal</h3>
-            <p>Seken.mlg mendukung pemanfaatan kembali barang yang masih layak digunakan di wilayah Malang.</p>
-            <div class="mini-stats">
-              <div><b>1.2K+</b><small>Barang</small></div>
-              <div><b>860+</b><small>Pengguna</small></div>
-              <div><b>Malang</b><small>Jangkauan</small></div>
-            </div>
-          </div>
-        </div>
-      </div>
+</section>
 
-      <div class="container content" id="products">
-        <div class="section-head">
-          <div>
-            <h2>Temukan Barang</h2>
-            <p>Cari barang bekas sesuai kebutuhanmu.</p>
-          </div>
-          <div class="search-box">
-            <span>⌕</span>
-            <input id="searchInput" oninput="renderProducts()" placeholder="Cari buku, sepatu, elektronik..." />
-          </div>
+<div class="container">
+
+    <h2 class="section-title">Kategori</h2>
+
+    <div class="categories">
+
+        <div class="category" onclick="filterCategory('Semua')">
+            Semua
         </div>
 
-        <div class="categories">
-          <button class="cat active" onclick="setCategory('Semua', this)">Semua</button>
-          <button class="cat" onclick="setCategory('Elektronik', this)">📱 Elektronik</button>
-          <button class="cat" onclick="setCategory('Buku', this)">📚 Buku</button>
-          <button class="cat" onclick="setCategory('Fashion', this)">👕 Fashion</button>
-          <button class="cat" onclick="setCategory('Kos', this)">🛏️ Perlengkapan Kos</button>
+        <div class="category" onclick="filterCategory('Buku')">
+            Buku
         </div>
 
-        <div id="productGrid" class="product-grid"></div>
-      </div>
-    </section>
-
-    <section id="detail" class="page">
-      <div class="container content detail-wrap" id="detailContent"></div>
-    </section>
-
-    <section id="jual" class="page">
-      <div class="container content narrow">
-        <div class="page-title">
-          <div class="pill">📦 Pasang Barang</div>
-          <h2>Jual Barangmu</h2>
-          <p>Isi informasi barang dengan jelas agar calon pembeli mudah memahami kondisinya.</p>
+        <div class="category" onclick="filterCategory('Elektronik')">
+            Elektronik
         </div>
-        <form class="form-card" onsubmit="submitProduct(event)">
-          <div class="form-grid">
-            <label>Nama Barang<input id="sellName" required placeholder="Contoh: Laptop ASUS"></label>
-            <label>Kategori
-              <select id="sellCategory" required>
-                <option value="">Pilih kategori</option><option>Elektronik</option><option>Buku</option><option>Fashion</option><option>Kos</option>
-              </select>
-            </label>
-            <label>Harga (Rp)<input id="sellPrice" type="number" required placeholder="150000"></label>
-            <label>Kondisi
-              <select id="sellCondition" required><option>Seperti Baru</option><option>Baik</option><option>Cukup Baik</option></select>
-            </label>
-            <label class="full">Lokasi COD<input id="sellLocation" required placeholder="Contoh: Lowokwaru, Malang"></label>
-            <label class="full">Deskripsi<textarea id="sellDesc" required placeholder="Jelaskan kondisi, kelengkapan, dan kekurangan barang..."></textarea></label>
-          </div>
-          <div class="upload">📷 <b>Upload foto</b><span> (prototype: simulasi upload)</span></div>
-          <button class="primary full-btn">Terbitkan Barang</button>
-        </form>
-      </div>
-    </section>
 
-    <section id="profil" class="page">
-      <div class="container content narrow">
-        <div class="profile-card">
-          <div class="avatar">FA</div>
-          <div class="profile-main"><span class="verified">✓ Pengguna terverifikasi</span><h2>Fadhil</h2><p>Malang, Jawa Timur</p><div class="rating">★★★★★ <b>4.9</b> · 24 transaksi</div></div>
-          <button class="secondary" onclick="alert('Fitur edit profil merupakan bagian prototype.')">Edit Profil</button>
+        <div class="category" onclick="filterCategory('Pakaian')">
+            Pakaian
         </div>
-        <div class="stats-row">
-          <div><b>12</b><span>Barang Dijual</span></div><div><b>8</b><span>Barang Dibeli</span></div><div><b id="profilePoints">120</b><span>COD Point</span></div>
-        </div>
-        <div class="point-card">
-          <div><div class="point-big">⭐ <span id="pointBig">120</span></div><h3>COD Point</h3><p>Poin penghargaan dari aktivitas transaksi lokal di Seken.mlg.</p></div>
-          <button class="primary" onclick="addPoints()">Simulasi +10 Point</button>
-        </div>
-        <h2 class="subheading">Aktivitas Terbaru</h2>
-        <div class="activity"><span>🛍️</span><div><b>Berhasil membeli Buku Pemrograman Arduino</b><small>2 hari lalu · Lowokwaru</small></div><strong>+10 point</strong></div>
-        <div class="activity"><span>📦</span><div><b>Barang Laptop ASUS ditambahkan</b><small>5 hari lalu · Malang</small></div><strong>+5 point</strong></div>
-      </div>
-    </section>
-  </main>
 
-  <footer>
-    <div class="container footer-inner">
-      <div><b>seken<span>.mlg</span></b><small>Marketplace barang bekas lokal Malang.</small></div>
-      <small>Prototype Manajemen Inovasi • 2026</small>
+        <div class="category" onclick="filterCategory('Kos')">
+            Perlengkapan Kos
+        </div>
+
     </div>
-  </footer>
 
-  <div id="toast" class="toast"></div>
-  <script src="script.js"></script>
+    <h2 class="section-title">Barang Terbaru</h2>
+
+    <div id="productList" class="products">
+
+        <div class="loading">
+            Memuat produk...
+        </div>
+
+    </div>
+
+</div>
+
+<footer>
+    <p>© 2026 Seken.mlg - Jual Beli Barang Bekas di Malang</p>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase-config.js"></script>
+
+<script>
+
+let allProducts = [];
+
+async function loadProducts() {
+
+    const productList =
+        document.getElementById("productList");
+
+    const { data, error } =
+        await window.supabaseClient
+        .from("products")
+        .select("*")
+        .order("created_at", {
+            ascending: false
+        });
+
+    if (error) {
+
+        console.error(error);
+
+        productList.innerHTML = `
+            <div class="empty">
+                Gagal mengambil data produk.
+                <br>
+                ${error.message}
+            </div>
+        `;
+
+        return;
+    }
+
+    allProducts = data || [];
+
+    displayProducts(allProducts);
+}
+
+
+function displayProducts(products) {
+
+    const productList =
+        document.getElementById("productList");
+
+    if (products.length === 0) {
+
+        productList.innerHTML = `
+            <div class="empty">
+                Belum ada barang yang dijual.
+            </div>
+        `;
+
+        return;
+    }
+
+    productList.innerHTML =
+        products.map(product => {
+
+            const image =
+                product.image_url;
+
+            return `
+                <div class="product">
+
+                    <div class="product-image">
+
+                        ${
+                            image
+                            ?
+                            `<img src="${image}" alt="${product.name}">`
+                            :
+                            `Belum ada foto`
+                        }
+
+                    </div>
+
+                    <div class="product-info">
+
+                        <div class="product-name">
+                            ${product.name}
+                        </div>
+
+                        <div class="price">
+                            Rp${Number(product.price).toLocaleString("id-ID")}
+                        </div>
+
+                        <div class="condition">
+                            Kondisi: ${product.condition}
+                        </div>
+
+                        <div class="location">
+                            📍 ${product.location || "Malang"}
+                        </div>
+
+                    </div>
+
+                </div>
+            `;
+
+        }).join("");
+}
+
+
+function searchProducts() {
+
+    const keyword =
+        document
+        .getElementById("searchInput")
+        .value
+        .toLowerCase();
+
+    const filtered =
+        allProducts.filter(product =>
+            product.name
+            .toLowerCase()
+            .includes(keyword)
+        );
+
+    displayProducts(filtered);
+}
+
+
+function filterCategory(category) {
+
+    if (category === "Semua") {
+
+        displayProducts(allProducts);
+
+        return;
+    }
+
+    const filtered =
+        allProducts.filter(product =>
+            product.category === category
+        );
+
+    displayProducts(filtered);
+}
+
+
+loadProducts();
+
+</script>
+
 </body>
 </html>
