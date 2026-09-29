@@ -335,6 +335,17 @@ function showPage(page) {
   });
 
 
+  // ====================================================
+  // LOAD PROFILE SAAT HALAMAN PROFIL DIBUKA
+  // ====================================================
+
+  if (page === "profil") {
+
+    loadProfile();
+
+  }
+
+
   window.scrollTo({
 
     top: 0,
@@ -342,6 +353,502 @@ function showPage(page) {
     behavior: "smooth"
 
   });
+}
+
+
+// ======================================================
+// LOAD PROFILE DARI SUPABASE
+// ======================================================
+
+async function loadProfile() {
+
+  try {
+
+    // ==================================================
+    // CEK USER YANG SEDANG LOGIN
+    // ==================================================
+
+    const {
+      data: { user },
+      error: userError
+    } = await window.supabaseClient.auth.getUser();
+
+
+    // ==================================================
+    // JIKA BELUM LOGIN
+    // ==================================================
+
+    if (userError || !user) {
+
+      document.getElementById("profileName").textContent =
+        "Belum Login";
+
+      document.getElementById("profileLocation").textContent =
+        "Silakan login terlebih dahulu";
+
+      document.getElementById("profileAvatar").textContent =
+        "U";
+
+      document.getElementById("profileSold").textContent =
+        "0";
+
+      document.getElementById("profileBought").textContent =
+        "0";
+
+      document.getElementById("myProducts").innerHTML = `
+        <div class="activity">
+          <span>🔐</span>
+
+          <div>
+            <b>Silakan login untuk melihat profil</b>
+
+            <small>
+              Login untuk melihat data profil dan barang.
+            </small>
+          </div>
+        </div>
+      `;
+
+      return;
+    }
+
+
+    // ==================================================
+    // AMBIL DATA PROFILE
+    // ==================================================
+
+    const {
+      data: profile,
+      error: profileError
+    } = await window.supabaseClient
+      .from("profiles")
+      .select("name, location, avatar_url")
+      .eq("id", user.id)
+      .maybeSingle();
+
+
+    if (profileError) {
+
+      console.error(
+        "Gagal mengambil profil:",
+        profileError
+      );
+
+    }
+
+
+    // ==================================================
+    // DATA PROFILE
+    // ==================================================
+
+    const name =
+      profile?.name ||
+      user.user_metadata?.name ||
+      user.email?.split("@")[0] ||
+      "Pengguna";
+
+
+    const location =
+      profile?.location ||
+      user.user_metadata?.location ||
+      "Malang, Jawa Timur";
+
+
+    // ==================================================
+    // TAMPILKAN DATA PROFILE
+    // ==================================================
+
+    document.getElementById("profileName").textContent =
+      name;
+
+
+    document.getElementById("profileLocation").textContent =
+      location;
+
+
+    document.getElementById("profileAvatar").textContent =
+      name.charAt(0).toUpperCase();
+
+
+    // ==================================================
+    // AMBIL BARANG MILIK USER
+    // ==================================================
+
+    const {
+      data: myProducts,
+      error: productsError
+    } = await window.supabaseClient
+      .from("products")
+      .select("*")
+      .eq("seller_id", user.id)
+      .order("created_at", {
+        ascending: false
+      });
+
+
+    if (productsError) {
+
+      console.error(
+        "Gagal mengambil barang:",
+        productsError
+      );
+
+
+      document.getElementById("myProducts").innerHTML = `
+        <div class="activity">
+
+          <span>⚠️</span>
+
+          <div>
+
+            <b>Gagal memuat barang</b>
+
+            <small>
+              ${productsError.message}
+            </small>
+
+          </div>
+
+        </div>
+      `;
+
+      return;
+    }
+
+
+    const productsSaya =
+      myProducts || [];
+
+
+    // ==================================================
+    // JUMLAH BARANG DIJUAL
+    // ==================================================
+
+    document.getElementById("profileSold").textContent =
+      productsSaya.length;
+
+
+    // Untuk sementara belum ada sistem pembelian
+    document.getElementById("profileBought").textContent =
+      "0";
+
+
+    // ==================================================
+    // COD POINT
+    // ==================================================
+
+    document.getElementById("profilePoints").textContent =
+      points;
+
+
+    document.getElementById("pointBig").textContent =
+      points;
+
+
+    // ==================================================
+    // TAMPILKAN BARANG SAYA
+    // ==================================================
+
+    const container =
+      document.getElementById("myProducts");
+
+
+    // Jika belum punya barang
+    if (productsSaya.length === 0) {
+
+      container.innerHTML = `
+        <div class="activity">
+
+          <span>📦</span>
+
+          <div>
+
+            <b>Belum ada barang</b>
+
+            <small>
+              Barang yang kamu jual akan muncul di sini.
+            </small>
+
+          </div>
+
+        </div>
+      `;
+
+      return;
+    }
+
+
+    // ==================================================
+    // TAMPILKAN DAFTAR BARANG
+    // ==================================================
+
+    container.innerHTML =
+      productsSaya.map(product => {
+
+        const image =
+          product.image_url
+
+            ? `
+              <img
+                src="${product.image_url}"
+                alt="${product.name}"
+              >
+            `
+
+            : `
+              <div class="no-image">
+                📦
+              </div>
+            `;
+
+
+        const price =
+          Number(product.price || 0)
+            .toLocaleString("id-ID");
+
+
+        return `
+          <article
+            class="product-card"
+            onclick="showDetail('${product.id}')"
+          >
+
+            <div class="product-image">
+              ${image}
+            </div>
+
+
+            <div class="product-info">
+
+              <span class="product-category">
+                ${product.category}
+              </span>
+
+
+              <h3>
+                ${product.name}
+              </h3>
+
+
+              <strong class="product-price">
+                Rp ${price}
+              </strong>
+
+
+              <p>
+                ${product.condition}
+              </p>
+
+
+              <small>
+                📍 ${product.location || "Malang"}
+              </small>
+
+            </div>
+
+          </article>
+        `;
+
+      }).join("");
+
+
+  } catch (error) {
+
+    console.error(
+      "Error loadProfile:",
+      error
+    );
+
+  }
+}
+
+
+// ======================================================
+// EDIT PROFILE
+// ======================================================
+
+async function editProfile() {
+
+  try {
+
+    // ==================================================
+    // CEK LOGIN
+    // ==================================================
+
+    const {
+      data: { user }
+    } = await window.supabaseClient.auth.getUser();
+
+
+    if (!user) {
+
+      alert(
+        "Silakan login terlebih dahulu."
+      );
+
+      return;
+    }
+
+
+    // ==================================================
+    // DATA SAAT INI
+    // ==================================================
+
+    const currentName =
+      document.getElementById("profileName").textContent;
+
+
+    const currentLocation =
+      document.getElementById("profileLocation").textContent;
+
+
+    // ==================================================
+    // INPUT NAMA BARU
+    // ==================================================
+
+    const newName =
+      prompt(
+        "Masukkan nama baru:",
+        currentName
+      );
+
+
+    if (newName === null) {
+
+      return;
+
+    }
+
+
+    // ==================================================
+    // VALIDASI NAMA
+    // ==================================================
+
+    if (newName.trim() === "") {
+
+      alert(
+        "Nama tidak boleh kosong."
+      );
+
+      return;
+    }
+
+
+    // ==================================================
+    // INPUT LOKASI BARU
+    // ==================================================
+
+    const newLocation =
+      prompt(
+        "Masukkan lokasi:",
+        currentLocation
+      );
+
+
+    if (newLocation === null) {
+
+      return;
+
+    }
+
+
+    // ==================================================
+    // VALIDASI LOKASI
+    // ==================================================
+
+    if (newLocation.trim() === "") {
+
+      alert(
+        "Lokasi tidak boleh kosong."
+      );
+
+      return;
+    }
+
+
+    // ==================================================
+    // SIMPAN PROFILE KE SUPABASE
+    // ==================================================
+
+    const {
+      error
+    } = await window.supabaseClient
+      .from("profiles")
+      .upsert(
+        {
+          id: user.id,
+          name: newName.trim(),
+          location: newLocation.trim()
+        },
+        {
+          onConflict: "id"
+        }
+      );
+
+
+    if (error) {
+
+      console.error(error);
+
+      alert(
+        "Gagal memperbarui profil: " +
+        error.message
+      );
+
+      return;
+    }
+
+
+    // ==================================================
+    // UPDATE DATA USER AUTH
+    // ==================================================
+
+    await window.supabaseClient.auth.updateUser({
+
+      data: {
+
+        name: newName.trim(),
+
+        location: newLocation.trim()
+
+      }
+
+    });
+
+
+    // ==================================================
+    // UPDATE TAMPILAN
+    // ==================================================
+
+    document.getElementById("profileName").textContent =
+      newName.trim();
+
+
+    document.getElementById("profileLocation").textContent =
+      newLocation.trim();
+
+
+    document.getElementById("profileAvatar").textContent =
+      newName
+        .trim()
+        .charAt(0)
+        .toUpperCase();
+
+
+    alert(
+      "Profil berhasil diperbarui."
+    );
+
+
+  } catch (error) {
+
+    console.error(error);
+
+    alert(
+      "Terjadi kesalahan saat memperbarui profil."
+    );
+
+  }
 }
 
 
