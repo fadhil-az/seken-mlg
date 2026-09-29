@@ -667,11 +667,15 @@ async function loadProfile() {
 // EDIT PROFILE
 // ======================================================
 
+// ======================================================
+// EDIT PROFILE
+// ======================================================
+
 async function editProfile() {
 
   try {
 
-    // CEK USER LOGIN
+    // Cek user yang sedang login
     const {
       data: { user },
       error: userError
@@ -682,95 +686,196 @@ async function editProfile() {
       return;
     }
 
-    // DATA PROFILE SAAT INI
-    const currentName =
-      document.getElementById("profileName").textContent;
+    // Ambil data profile dari Supabase
+    const {
+      data: profile,
+      error: profileError
+    } = await window.supabaseClient
+      .from("profiles")
+      .select("name, phone, location")
+      .eq("id", user.id)
+      .maybeSingle();
 
-    const currentLocation =
-      document.getElementById("profileLocation").textContent;
+    if (profileError) {
 
-    // INPUT NAMA BARU
-    const newName = prompt(
-      "Masukkan nama baru:",
-      currentName
-    );
+      console.error(
+        "Gagal mengambil profil:",
+        profileError
+      );
 
-    if (newName === null) {
+      alert(
+        "Gagal mengambil data profil:\n" +
+        profileError.message
+      );
+
       return;
     }
 
-    if (newName.trim() === "") {
+    // Masukkan data ke form
+    document.getElementById("editName").value =
+      profile?.name ||
+      user.user_metadata?.name ||
+      "";
+
+    document.getElementById("editPhone").value =
+      profile?.phone ||
+      "";
+
+    document.getElementById("editLocation").value =
+      profile?.location ||
+      user.user_metadata?.location ||
+      "Malang, Jawa Timur";
+
+    // Tampilkan modal
+    document.getElementById("editProfileModal").style.display =
+      "flex";
+
+  } catch (error) {
+
+    console.error(
+      "Error editProfile:",
+      error
+    );
+
+    alert(
+      "Terjadi kesalahan saat membuka Edit Profil."
+    );
+
+  }
+}
+
+
+// ======================================================
+// TUTUP MODAL EDIT PROFILE
+// ======================================================
+
+function closeEditProfile() {
+
+  const modal =
+    document.getElementById("editProfileModal");
+
+  if (modal) {
+    modal.style.display = "none";
+  }
+
+}
+
+
+// ======================================================
+// SIMPAN PROFILE KE SUPABASE
+// ======================================================
+
+async function saveProfile(event) {
+
+  event.preventDefault();
+
+  const button =
+    document.getElementById("saveProfileButton");
+
+  try {
+
+    // Cek user login
+    const {
+      data: { user },
+      error: userError
+    } = await window.supabaseClient.auth.getUser();
+
+    if (userError || !user) {
+      alert("Silakan login terlebih dahulu.");
+      return;
+    }
+
+    // Ambil data dari form
+    const name =
+      document.getElementById("editName").value.trim();
+
+    const phone =
+      document.getElementById("editPhone").value.trim();
+
+    const location =
+      document.getElementById("editLocation").value.trim();
+
+    // Validasi nama
+    if (!name) {
       alert("Nama tidak boleh kosong.");
       return;
     }
 
-    // INPUT LOKASI BARU
-    const newLocation = prompt(
-      "Masukkan lokasi:",
-      currentLocation
-    );
-
-    if (newLocation === null) {
-      return;
-    }
-
-    if (newLocation.trim() === "") {
+    // Validasi lokasi
+    if (!location) {
       alert("Lokasi tidak boleh kosong.");
       return;
     }
 
-    // SIMPAN KE SUPABASE
-    const { error } =
-      await window.supabaseClient
-        .from("profiles")
-        .upsert({
-          id: user.id,
-          name: newName.trim(),
-          location: newLocation.trim()
-        }, {
-          onConflict: "id"
-        });
+    // Ubah tombol menjadi loading
+    button.disabled = true;
+    button.textContent = "Menyimpan...";
 
+    // Simpan ke Supabase
+    const {
+      error
+    } = await window.supabaseClient
+      .from("profiles")
+      .upsert({
+        id: user.id,
+        name: name,
+        phone: phone,
+        location: location
+      }, {
+        onConflict: "id"
+      });
+
+    // Jika gagal
     if (error) {
 
       console.error(
-        "Gagal memperbarui profil:",
+        "Gagal menyimpan profil:",
         error
       );
 
       alert(
-        "Gagal memperbarui profil:\n" +
+        "Profil gagal disimpan:\n" +
         error.message
       );
 
       return;
     }
 
-    // UPDATE TAMPILAN
-    document.getElementById("profileName").textContent =
-      newName.trim();
+    // Update tampilan profil
+    document.querySelector("#profil .avatar").textContent =
+      name.charAt(0).toUpperCase();
 
-    document.getElementById("profileLocation").textContent =
-      newLocation.trim();
+    document.querySelector("#profil .profile-main h2").textContent =
+      name;
 
-    document.getElementById("profileAvatar").textContent =
-      newName.trim().charAt(0).toUpperCase();
+    document.querySelector("#profil .profile-main p").textContent =
+      location;
+
+    // Tutup modal
+    closeEditProfile();
 
     alert("Profil berhasil diperbarui!");
 
   } catch (error) {
 
     console.error(
-      "Error edit profile:",
+      "Error saveProfile:",
       error
     );
 
     alert(
-      "Terjadi kesalahan saat mengubah profil."
+      "Terjadi kesalahan saat menyimpan profil."
     );
+
+  } finally {
+
+    if (button) {
+      button.disabled = false;
+      button.textContent = "Simpan Perubahan";
+    }
+
   }
 }
-
 // ======================================================
 // JUAL BARANG + UPLOAD FOTO
 // ======================================================
