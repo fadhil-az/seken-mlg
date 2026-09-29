@@ -101,7 +101,17 @@
             <label class="full">Lokasi COD<input id="sellLocation" required placeholder="Contoh: Lowokwaru, Malang"></label>
             <label class="full">Deskripsi<textarea id="sellDesc" required placeholder="Jelaskan kondisi, kelengkapan, dan kekurangan barang..."></textarea></label>
           </div>
-          <div class="upload">📷 <b>Upload foto</b><span> (prototype: simulasi upload)</span></div>
+         <label class="upload" for="sellImage" style="cursor:pointer;">
+  📷 <b>Upload foto</b>
+  <span> (pilih foto barang)</span>
+</label>
+
+<input
+  id="sellImage"
+  type="file"
+  accept="image/*"
+  style="display:none;"
+>
           <button class="primary full-btn">Terbitkan Barang</button>
         </form>
       </div>
