@@ -120,17 +120,44 @@
     <section id="profil" class="page">
       <div class="container content narrow">
         <div class="profile-card">
-          <div class="avatar">FA</div>
-          <div class="profile-main"><span class="verified">✓ Pengguna terverifikasi</span><h2>Fadhil</h2><p>Malang, Jawa Timur</p><div class="rating">★★★★★ <b>4.9</b> · 24 transaksi</div></div>
+         <div class="avatar" id="profileAvatar">F</div>
+
+<div class="profile-main">
+  <span class="verified">✓ Pengguna terverifikasi</span>
+
+  <h2 id="profileName">Fadhil</h2>
+
+  <p id="profileLocation">Malang, Jawa Timur</p>
+
+  <div class="rating">
+    ★★★★★ <b>4.9</b> · 24 transaksi
+  </div>
+</div>
           <button class="secondary" onclick="editProfile()">Edit Profil</button>
-        </div>
+</div>
         <div class="stats-row">
-          <div><b>12</b><span>Barang Dijual</span></div><div><b>8</b><span>Barang Dibeli</span></div><div><b id="profilePoints">120</b><span>COD Point</span></div>
-        </div>
+  <div>
+    <b id="profileSold">0</b>
+    <span>Barang Dijual</span>
+  </div>
+
+  <div>
+    <b id="profileBought">0</b>
+    <span>Barang Dibeli</span>
+  </div>
+
+  <div>
+    <b id="profilePoints">120</b>
+    <span>COD Point</span>
+  </div>
+</div>
         <div class="point-card">
           <div><div class="point-big">⭐ <span id="pointBig">120</span></div><h3>COD Point</h3><p>Poin penghargaan dari aktivitas transaksi lokal di Seken.mlg.</p></div>
           <button class="primary" onclick="addPoints()">Simulasi +10 Point</button>
         </div>
+          <h2 class="subheading">Barang Saya</h2>
+
+<div id="myProducts" class="product-grid"></div>
         <!-- MODAL EDIT PROFIL -->
 <div id="editProfileModal" class="edit-profile-modal" style="display:none;">
   <div class="edit-profile-box">
@@ -212,7 +239,7 @@
   <footer>
     <div class="container footer-inner">
       <div><b>seken<span>.mlg</span></b><small>Marketplace barang bekas lokal Malang.</small></div>
-      <small>Prototype Manajemen Inovasi • 2026</small>
+      <small>Seken.mlg • Marketplace barang bekas lokal Malang • 2026</small>
     </div>
   </footer>
 
