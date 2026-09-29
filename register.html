@@ -168,7 +168,7 @@
       button.disabled = true;
       button.textContent = "Membuat akun...";
 
-      const { data, error } = await supabase.auth.signUp({
+      const { data, error } = await window.supabaseClient.auth.signUp({
         email: email,
         password: password,
         options: {
