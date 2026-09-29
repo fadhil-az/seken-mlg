@@ -1,45 +1,274 @@
-const products=[
-{id:1,name:"Laptop ASUS VivoBook",category:"Elektronik",price:2800000,condition:"Baik",location:"Lowokwaru, Malang",icon:"💻",seller:"Rizky",rating:"4.8",desc:"Laptop masih berfungsi dengan baik, cocok untuk kuliah dan pekerjaan ringan. Charger tersedia."},
-{id:2,name:"Buku Pemrograman Arduino",category:"Buku",price:75000,condition:"Baik",location:"Sukun, Malang",icon:"📚",seller:"Alya",rating:"4.9",desc:"Buku referensi Arduino kondisi baik, beberapa halaman diberi tanda stabilo."},
-{id:3,name:"Sepatu Sneakers",category:"Fashion",price:180000,condition:"Seperti Baru",location:"Klojen, Malang",icon:"👟",seller:"Dimas",rating:"5.0",desc:"Sneakers jarang dipakai. Ukuran 42 dan masih sangat layak."},
-{id:4,name:"Kursi Kos Minimalis",category:"Kos",price:120000,condition:"Cukup Baik",location:"Blimbing, Malang",icon:"🪑",seller:"Nadia",rating:"4.7",desc:"Kursi untuk kebutuhan kamar kos, kokoh dan masih nyaman digunakan."},
-{id:5,name:"Headset Bluetooth",category:"Elektronik",price:95000,condition:"Baik",location:"Dinoyo, Malang",icon:"🎧",seller:"Fajar",rating:"4.8",desc:"Headset Bluetooth dengan suara jernih dan baterai masih normal."},
-{id:6,name:"Jaket Denim",category:"Fashion",price:130000,condition:"Baik",location:"Tlogomas, Malang",icon:"🧥",seller:"Sinta",rating:"4.9",desc:"Jaket denim ukuran M, tidak ada kerusakan dan siap dipakai."},
-{id:7,name:"Kalkulus Dasar",category:"Buku",price:50000,condition:"Baik",location:"Ketawanggede, Malang",icon:"📖",seller:"Bima",rating:"4.8",desc:"Buku kalkulus untuk mahasiswa. Isi lengkap dan cukup terawat."},
-{id:8,name:"Lampu Meja Belajar",category:"Kos",price:60000,condition:"Baik",location:"Sawojajar, Malang",icon:"💡",seller:"Nanda",rating:"4.9",desc:"Lampu meja cocok untuk belajar, kabel dan sakelar berfungsi."}
-];
-let currentCategory="Semua", points=120;
+let products = [];
+let currentCategory = "Semua";
+let points = 120;
 
-function formatPrice(n){return "Rp "+n.toLocaleString("id-ID")}
-function renderProducts(){
- const q=(document.getElementById("searchInput")?.value||"").toLowerCase();
- const data=products.filter(p=>(currentCategory==="Semua"||p.category===currentCategory)&&(p.name+" "+p.category+" "+p.location).toLowerCase().includes(q));
- document.getElementById("productGrid").innerHTML=data.length?data.map(p=>`
- <article class="product" onclick="showDetail(${p.id})"><div class="product-img">${p.icon}</div><div class="product-body">
- <span class="tag">${p.category}</span><h3>${p.name}</h3><div class="price">${formatPrice(p.price)}</div><div class="meta">📍 ${p.location} · ${p.condition}</div></div></article>`).join(""):`<div style="grid-column:1/-1;text-align:center;padding:50px;color:#78827a">Barang tidak ditemukan. Coba kata kunci lain.</div>`;
+async function loadProducts() {
+  const grid = document.getElementById("productGrid");
+
+  grid.innerHTML = `
+    <div style="grid-column:1/-1;text-align:center;padding:30px;">
+      Memuat barang...
+    </div>
+  `;
+
+  try {
+    const { data, error } = await window.supabaseClient
+      .from("products")
+      .select("*")
+      .order("created_at", { ascending: false });
+
+    if (error) {
+      console.error("Supabase error:", error);
+      grid.innerHTML = `
+        <div style="grid-column:1/-1;text-align:center;padding:30px;">
+          Gagal memuat barang.
+        </div>
+      `;
+      return;
+    }
+
+    products = data || [];
+    renderProducts();
+
+  } catch (error) {
+    console.error(error);
+    grid.innerHTML = `
+      <div style="grid-column:1/-1;text-align:center;padding:30px;">
+        Terjadi kesalahan saat memuat barang.
+      </div>
+    `;
+  }
 }
-function setCategory(cat,el){currentCategory=cat;document.querySelectorAll(".cat").forEach(x=>x.classList.remove("active"));el.classList.add("active");renderProducts()}
-function showPage(id){
- document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));document.getElementById(id).classList.add("active");
- document.querySelectorAll(".nav-link").forEach(n=>n.classList.toggle("active",n.dataset.page===id));
- window.scrollTo({top:0,behavior:"smooth"});
+
+
+function renderProducts() {
+  const grid = document.getElementById("productGrid");
+  const search = document
+    .getElementById("searchInput")
+    .value
+    .toLowerCase();
+
+  let filtered = products.filter(product => {
+
+    const matchCategory =
+      currentCategory === "Semua" ||
+      product.category === currentCategory;
+
+    const matchSearch =
+      product.name.toLowerCase().includes(search) ||
+      (product.description || "").toLowerCase().includes(search) ||
+      (product.location || "").toLowerCase().includes(search);
+
+    return matchCategory && matchSearch;
+  });
+
+  if (filtered.length === 0) {
+    grid.innerHTML = `
+      <div style="grid-column:1/-1;text-align:center;padding:40px;">
+        <h3>Belum ada barang</h3>
+        <p>Coba gunakan kata pencarian atau kategori lain.</p>
+      </div>
+    `;
+    return;
+  }
+
+  grid.innerHTML = filtered.map(product => {
+
+    const price = Number(product.price || 0).toLocaleString("id-ID");
+
+    return `
+      <article class="product-card"
+        onclick="showDetail('${product.id}')">
+
+        <div class="product-image">
+          ${
+            product.image_url
+              ? `<img src="${product.image_url}" alt="${product.name}">`
+              : `<div class="no-image">📦</div>`
+          }
+        </div>
+
+        <div class="product-info">
+          <span class="product-category">
+            ${product.category}
+          </span>
+
+          <h3>${product.name}</h3>
+
+          <strong class="product-price">
+            Rp ${price}
+          </strong>
+
+          <p>${product.condition}</p>
+
+          <small>📍 ${product.location || "Malang"}</small>
+        </div>
+
+      </article>
+    `;
+  }).join("");
 }
-function showDetail(id){
- const p=products.find(x=>x.id===id);
- document.getElementById("detailContent").innerHTML=`<button class="back" onclick="showPage('home')">← Kembali ke barang</button>
- <div class="detail-card"><div class="detail-img">${p.icon}</div><div class="detail-info"><span class="tag">${p.category}</span><h1>${p.name}</h1>
- <div class="detail-price">${formatPrice(p.price)}</div><p>${p.desc}</p>
- <div class="info-list"><div><b>Kondisi:</b> <span>${p.condition}</span></div><div><b>Lokasi:</b> <span>📍 ${p.location}</span></div><div><b>Penjual:</b> <span>${p.seller} · ⭐ ${p.rating}</span></div></div>
- <button class="primary" onclick="contactSeller('${p.seller}')">Hubungi Penjual</button> <button class="secondary" onclick="showToast('Barang disimpan ke favorit ❤️')">♡ Simpan</button></div></div>`;
- showPage("detail");
+
+
+function setCategory(category, button) {
+  currentCategory = category;
+
+  document.querySelectorAll(".cat").forEach(btn => {
+    btn.classList.remove("active");
+  });
+
+  button.classList.add("active");
+
+  renderProducts();
 }
-function contactSeller(name){showToast("Chat dengan "+name+" dibuka (simulasi prototype).")}
-function submitProduct(e){
- e.preventDefault();
- const name=document.getElementById("sellName").value;
- products.unshift({id:Date.now(),name,category:document.getElementById("sellCategory").value,price:Number(document.getElementById("sellPrice").value),condition:document.getElementById("sellCondition").value,location:document.getElementById("sellLocation").value,icon:"📦",seller:"Fadhil",rating:"5.0",desc:document.getElementById("sellDesc").value});
- e.target.reset();showToast("Barang berhasil ditambahkan ke katalog!");showPage("home");renderProducts();
+
+
+function showDetail(id) {
+  const product = products.find(item => item.id === id);
+
+  if (!product) return;
+
+  const detail = document.getElementById("detailContent");
+
+  const price = Number(product.price || 0).toLocaleString("id-ID");
+
+  detail.innerHTML = `
+    <button class="secondary" onclick="showPage('home')">
+      ← Kembali
+    </button>
+
+    <div class="detail-card">
+
+      <div class="detail-image">
+        ${
+          product.image_url
+            ? `<img src="${product.image_url}" alt="${product.name}">`
+            : `<div class="no-image">📦</div>`
+        }
+      </div>
+
+      <div class="detail-info">
+
+        <span class="product-category">
+          ${product.category}
+        </span>
+
+        <h1>${product.name}</h1>
+
+        <h2>Rp ${price}</h2>
+
+        <p>
+          <b>Kondisi:</b> ${product.condition}
+        </p>
+
+        <p>
+          <b>Lokasi:</b> ${product.location || "Malang"}
+        </p>
+
+        <p>
+          ${product.description || "Tidak ada deskripsi."}
+        </p>
+
+        <button class="primary"
+          onclick="alert('Silakan hubungi penjual untuk melakukan transaksi.')">
+          Hubungi Penjual
+        </button>
+
+      </div>
+
+    </div>
+  `;
+
+  showPage("detail");
 }
-function addPoints(){points+=10;document.getElementById("navPoints").textContent=points;document.getElementById("profilePoints").textContent=points;document.getElementById("pointBig").textContent=points;showToast("Berhasil mendapatkan +10 COD Point ⭐")}
-function showToast(msg){const t=document.getElementById("toast");t.textContent=msg;t.style.display="block";clearTimeout(window.toastTimer);window.toastTimer=setTimeout(()=>t.style.display="none",2600)}
-renderProducts();
+
+
+function showPage(page) {
+  document.querySelectorAll(".page").forEach(section => {
+    section.classList.remove("active");
+  });
+
+  const target = document.getElementById(page);
+
+  if (target) {
+    target.classList.add("active");
+  }
+
+  document.querySelectorAll(".nav-link").forEach(link => {
+    link.classList.remove("active");
+
+    if (link.dataset.page === page) {
+      link.classList.add("active");
+    }
+  });
+
+  window.scrollTo({
+    top: 0,
+    behavior: "smooth"
+  });
+}
+
+
+async function submitProduct(event) {
+  event.preventDefault();
+
+  const {
+    data: { user }
+  } = await window.supabaseClient.auth.getUser();
+
+  if (!user) {
+    alert("Silakan login terlebih dahulu untuk menjual barang.");
+    window.location.href = "login.html";
+    return;
+  }
+
+  const name = document.getElementById("sellName").value;
+  const category = document.getElementById("sellCategory").value;
+  const price = document.getElementById("sellPrice").value;
+  const condition = document.getElementById("sellCondition").value;
+  const location = document.getElementById("sellLocation").value;
+  const description = document.getElementById("sellDesc").value;
+
+  const { error } = await window.supabaseClient
+    .from("products")
+    .insert({
+      name: name,
+      category: category,
+      price: price,
+      condition: condition,
+      description: description,
+      location: location,
+      seller_id: user.id,
+      seller_name: user.user_metadata?.name || user.email
+    });
+
+  if (error) {
+    console.error(error);
+    alert("Gagal menerbitkan barang: " + error.message);
+    return;
+  }
+
+  alert("Barang berhasil diterbitkan!");
+
+  event.target.reset();
+
+  await loadProducts();
+
+  showPage("home");
+}
+
+
+function addPoints() {
+  points += 10;
+
+  document.getElementById("navPoints").textContent = points;
+  document.getElementById("profilePoints").textContent = points;
+  document.getElementById("pointBig").textContent = points;
+
+  alert("Berhasil mendapatkan +10 COD Point!");
+}
+
+
+document.addEventListener("DOMContentLoaded", () => {
+  loadProducts();
+});
