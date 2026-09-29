@@ -671,6 +671,106 @@ async function editProfile() {
 
   try {
 
+    // CEK USER LOGIN
+    const {
+      data: { user },
+      error: userError
+    } = await window.supabaseClient.auth.getUser();
+
+    if (userError || !user) {
+      alert("Silakan login terlebih dahulu.");
+      return;
+    }
+
+    // DATA PROFILE SAAT INI
+    const currentName =
+      document.getElementById("profileName").textContent;
+
+    const currentLocation =
+      document.getElementById("profileLocation").textContent;
+
+    // INPUT NAMA BARU
+    const newName = prompt(
+      "Masukkan nama baru:",
+      currentName
+    );
+
+    if (newName === null) {
+      return;
+    }
+
+    if (newName.trim() === "") {
+      alert("Nama tidak boleh kosong.");
+      return;
+    }
+
+    // INPUT LOKASI BARU
+    const newLocation = prompt(
+      "Masukkan lokasi:",
+      currentLocation
+    );
+
+    if (newLocation === null) {
+      return;
+    }
+
+    if (newLocation.trim() === "") {
+      alert("Lokasi tidak boleh kosong.");
+      return;
+    }
+
+    // SIMPAN KE SUPABASE
+    const { error } =
+      await window.supabaseClient
+        .from("profiles")
+        .upsert({
+          id: user.id,
+          name: newName.trim(),
+          location: newLocation.trim()
+        }, {
+          onConflict: "id"
+        });
+
+    if (error) {
+
+      console.error(
+        "Gagal memperbarui profil:",
+        error
+      );
+
+      alert(
+        "Gagal memperbarui profil:\n" +
+        error.message
+      );
+
+      return;
+    }
+
+    // UPDATE TAMPILAN
+    document.getElementById("profileName").textContent =
+      newName.trim();
+
+    document.getElementById("profileLocation").textContent =
+      newLocation.trim();
+
+    document.getElementById("profileAvatar").textContent =
+      newName.trim().charAt(0).toUpperCase();
+
+    alert("Profil berhasil diperbarui!");
+
+  } catch (error) {
+
+    console.error(
+      "Error edit profile:",
+      error
+    );
+
+    alert(
+      "Terjadi kesalahan saat mengubah profil."
+    );
+  }
+}
+
     // ==================================================
     // CEK LOGIN
     // ==================================================
