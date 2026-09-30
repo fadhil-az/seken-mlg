@@ -191,110 +191,144 @@ function setCategory(category, button) {
 // DETAIL PRODUK
 // ======================================================
 
-function showDetail(id) {
+async function showDetail(id) {
+  const product = products.find(item => item.id === id);
+  if (!product) return;
 
-  const product =
-    products.find(item => item.id === id);
-
-
-  if (!product) {
-    return;
-  }
-
-
-  const detail =
-    document.getElementById("detailContent");
-
-
-  const price =
-    Number(product.price || 0)
-      .toLocaleString("id-ID");
-
+  const detail = document.getElementById("detailContent");
+  const price = Number(product.price || 0).toLocaleString("id-ID");
 
   detail.innerHTML = `
-
-    <button
-      class="secondary"
-      onclick="showPage('home')"
-    >
+    <button class="secondary" onclick="showPage('home')">
       ← Kembali
     </button>
 
-
     <div class="detail-card">
-
-
       <div class="detail-image">
-
         ${
           product.image_url
-
-            ? `
-              <img
-                src="${product.image_url}"
-                alt="${product.name}"
-              >
-            `
-
-            : `
-              <div class="no-image">
-                📦
-              </div>
-            `
+            ? `<img src="${product.image_url}" alt="${product.name}">`
+            : `<div class="no-image">📦</div>`
         }
-
       </div>
 
-
       <div class="detail-info">
+        <span class="product-category">${product.category}</span>
 
-        <span class="product-category">
-          ${product.category}
-        </span>
+        <h1>${product.name}</h1>
 
+        <h2>Rp ${price}</h2>
 
-        <h1>
-          ${product.name}
-        </h1>
+        <p><b>Kondisi:</b> ${product.condition}</p>
 
+        <p><b>Lokasi:</b> ${product.location || "Malang"}</p>
 
-        <h2>
-          Rp ${price}
-        </h2>
-
-
-        <p>
-          <b>Kondisi:</b>
-          ${product.condition}
-        </p>
-
-
-        <p>
-          <b>Lokasi:</b>
-          ${product.location || "Malang"}
-        </p>
-
-
-        <p>
-          ${product.description || "Tidak ada deskripsi."}
-        </p>
-
+        <p>${product.description || "Tidak ada deskripsi."}</p>
 
         <button
           class="primary"
-          onclick="alert('Silakan hubungi penjual untuk melakukan transaksi.')"
-        >
-          Hubungi Penjual
+          id="contactSellerButton"
+          onclick="contactSeller('${product.id}')">
+          💬 Hubungi Penjual
         </button>
-
       </div>
-
     </div>
   `;
 
-
   showPage("detail");
 }
+// ======================================================
+// HUBUNGI PENJUAL VIA WHATSAPP
+// ======================================================
+
+async function contactSeller(productId) {
+
+  try {
+
+    const product =
+      products.find(item => item.id === productId);
+
+    if (!product) {
+      alert("Data barang tidak ditemukan.");
+      return;
+    }
+
+    if (!product.seller_id) {
+      alert("Data penjual belum tersedia.");
+      return;
+    }
+
+    const {
+      data: seller,
+      error
+    } = await window.supabaseClient
+      .from("profiles")
+      .select("name, phone")
+      .eq("id", product.seller_id)
+      .maybeSingle();
+
+    if (error) {
+
+      console.error(
+        "Gagal mengambil data penjual:",
+        error
+      );
+
+      alert(
+        "Data penjual gagal dimuat:\n" +
+        error.message
+      );
+
+      return;
+    }
+
+    if (!seller || !seller.phone) {
+
+      alert(
+        "Penjual belum memasukkan nomor WhatsApp."
+      );
+
+      return;
+    }
+
+    let phone =
+      seller.phone.replace(/\D/g, "");
+
+    if (phone.startsWith("0")) {
+
+      phone =
+        "62" + phone.substring(1);
+
+    }
+
+    const message =
+      encodeURIComponent(
+        `Halo ${seller.name || "Penjual"}, saya tertarik dengan barang "${product.name}" di Seken.mlg. Apakah barangnya masih tersedia?`
+      );
+
+    const whatsappUrl =
+      `https://wa.me/${phone}?text=${message}`;
+
+    window.open(
+      whatsappUrl,
+      "_blank"
+    );
+
+  } catch (error) {
+
+    console.error(
+      "Error contactSeller:",
+      error
+    );
+
+    alert(
+      "Terjadi kesalahan saat menghubungi penjual."
+    );
+
+  }
+}
+
+ 
 
 
 // ======================================================
@@ -662,10 +696,6 @@ async function loadProfile() {
   }
 }
 
-
-// ======================================================
-// EDIT PROFILE
-// ======================================================
 
 // ======================================================
 // EDIT PROFILE
