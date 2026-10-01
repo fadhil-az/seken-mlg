@@ -617,75 +617,110 @@ async function loadProfile() {
     // TAMPILKAN DAFTAR BARANG
     // ==================================================
 
-    container.innerHTML =
-      productsSaya.map(product => {
+    // ==================================================
+// TAMPILKAN DAFTAR BARANG + STATUS
+// ==================================================
 
-        const image =
-          product.image_url
+container.innerHTML =
+  productsSaya.map(product => {
 
-            ? `
-              <img
-                src="${product.image_url}"
-                alt="${product.name}"
-              >
-            `
-
-            : `
-              <div class="no-image">
-                📦
-              </div>
-            `;
-
-
-        const price =
-          Number(product.price || 0)
-            .toLocaleString("id-ID");
-
-
-        return `
-          <article
-            class="product-card"
-            onclick="showDetail('${product.id}')"
+    const image =
+      product.image_url
+        ? `
+          <img
+            src="${product.image_url}"
+            alt="${product.name}"
           >
-
-            <div class="product-image">
-              ${image}
-            </div>
-
-
-            <div class="product-info">
-
-              <span class="product-category">
-                ${product.category}
-              </span>
-
-
-              <h3>
-                ${product.name}
-              </h3>
-
-
-              <strong class="product-price">
-                Rp ${price}
-              </strong>
-
-
-              <p>
-                ${product.condition}
-              </p>
-
-
-              <small>
-                📍 ${product.location || "Malang"}
-              </small>
-
-            </div>
-
-          </article>
+        `
+        : `
+          <div class="no-image">
+            📦
+          </div>
         `;
 
-      }).join("");
+    const price =
+      Number(product.price || 0)
+        .toLocaleString("id-ID");
 
+    // ==================================================
+    // STATUS BARANG
+    // ==================================================
+
+    const status = product.status || "pending";
+
+    let statusLabel = "⏳ Pending";
+    let statusClass = "status-pending";
+
+    if (status === "approved") {
+      statusLabel = "✓ Disetujui";
+      statusClass = "status-approved";
+    }
+
+    if (status === "rejected") {
+      statusLabel = "✕ Ditolak";
+      statusClass = "status-rejected";
+    }
+
+    const rejectionReason =
+      status === "rejected" && product.rejection_reason
+        ? `
+          <small class="rejection-reason">
+            Alasan: ${product.rejection_reason}
+          </small>
+        `
+        : "";
+
+    // Barang yang belum disetujui tidak perlu dibuka ke detail
+    const clickAction =
+      status === "approved"
+        ? `onclick="showDetail('${product.id}')"`
+        : "";
+
+    return `
+      <article
+        class="product-card"
+        ${clickAction}
+      >
+
+        <div class="product-image">
+          ${image}
+        </div>
+
+        <div class="product-info">
+
+          <span class="product-category">
+            ${product.category}
+          </span>
+
+          <h3>
+            ${product.name}
+          </h3>
+
+          <strong class="product-price">
+            Rp ${price}
+          </strong>
+
+          <p>
+            ${product.condition}
+          </p>
+
+          <small>
+            📍 ${product.location || "Malang"}
+          </small>
+
+          <!-- STATUS BARANG -->
+          <div class="product-status ${statusClass}">
+            ${statusLabel}
+          </div>
+
+          ${rejectionReason}
+
+        </div>
+
+      </article>
+    `;
+
+  }).join("");
 
   } catch (error) {
 
