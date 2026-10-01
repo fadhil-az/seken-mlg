@@ -18,9 +18,10 @@ async function loadProducts() {
 
   try {
     const { data, error } = await window.supabaseClient
-      .from("products")
-      .select("*")
-      .order("created_at", { ascending: false });
+  .from("products")
+  .select("*")
+  .eq("status", "approved")
+  .order("created_at", { ascending: false });
 
     if (error) {
       console.error("Supabase error:", error);
@@ -1032,33 +1033,22 @@ async function submitProduct(event) {
   // SIMPAN PRODUK KE DATABASE
   // ==================================================
 
-  const {
-    error
-  } = await window.supabaseClient
-    .from("products")
-    .insert({
-
-      name: name,
-
-      category: category,
-
-      price: price,
-
-      condition: condition,
-
-      description: description,
-
-      location: location,
-
+ const { error } = await window.supabaseClient
+  .from("products")
+  .insert([
+    {
+      name,
+      category,
+      price,
+      condition,
+      description,
+      location,
       image_url: imageUrl,
-
+      seller_name: user.user_metadata?.name || user.email,
       seller_id: user.id,
-
-      seller_name:
-        user.user_metadata?.name ||
-        user.email
-
-    });
+      status: "pending"
+    }
+  ]);
 
 
   if (error) {
@@ -1079,8 +1069,10 @@ async function submitProduct(event) {
 
 
   alert(
-    "Barang dan foto berhasil diterbitkan!"
-  );
+  "Barang berhasil dikirim!\n\n" +
+  "Barang kamu sedang menunggu pemeriksaan admin. " +
+  "Barang akan tampil di Beranda setelah disetujui."
+);
 
 
   // Reset form
