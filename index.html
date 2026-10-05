@@ -84,16 +84,50 @@
 
       <div class="container content" id="products">
         <div class="section-head">
-          <div>
-            <h2>Temukan Barang</h2>
-            <p>Cari barang bekas sesuai kebutuhanmu.</p>
-          </div>
-          <div class="search-box">
-            <span>⌕</span>
-            <input id="searchInput" oninput="renderProducts()" placeholder="Cari buku, sepatu, elektronik..." />
-          </div>
-        </div>
+  <div>
+    <h2>Temukan Barang</h2>
+    <p>Cari barang bekas sesuai kebutuhanmu.</p>
+  </div>
+</div>
 
+<div class="product-filter">
+
+  <div class="search-box">
+    🔎
+    <input
+      type="text"
+      id="searchInput"
+      placeholder="Cari barang..."
+      oninput="applyFilters()"
+    >
+  </div>
+
+  <div class="filter-row">
+
+    <select id="conditionFilter" onchange="applyFilters()">
+      <option value="Semua">Semua Kondisi</option>
+      <option value="Seperti Baru">Seperti Baru</option>
+      <option value="Baik">Baik</option>
+      <option value="Cukup Baik">Cukup Baik</option>
+    </select>
+
+    <select id="priceFilter" onchange="applyFilters()">
+      <option value="default">Urutkan Harga</option>
+      <option value="low">Harga Terendah</option>
+      <option value="high">Harga Tertinggi</option>
+    </select>
+
+    <button
+      class="secondary"
+      type="button"
+      onclick="resetFilters()"
+    >
+      🔄 Reset
+    </button>
+
+  </div>
+
+</div>
         <div class="categories">
           <button class="cat active" onclick="setCategory('Semua', this)">Semua</button>
           <button class="cat" onclick="setCategory('Elektronik', this)">📱 Elektronik</button>
