@@ -1,7 +1,5 @@
 let products = [];
 let currentCategory = "Semua";
-let points = 120;
-
 
 // ======================================================
 // LOAD PRODUCTS DARI SUPABASE
@@ -756,18 +754,6 @@ async function loadProfile() {
 
 
     // ==================================================
-    // COD POINT
-    // ==================================================
-
-    document.getElementById("profilePoints").textContent =
-      points;
-
-
-    document.getElementById("pointBig").textContent =
-      points;
-
-
-    // ==================================================
     // TAMPILKAN BARANG SAYA
     // ==================================================
 
@@ -1415,47 +1401,6 @@ async function submitProduct(event) {
   // Kembali ke halaman utama
   showPage("home");
 }
-
-
-// ======================================================
-// COD POINT
-// ======================================================
-
-function addPoints() {
-
-  points += 10;
-
-
-  const navPoints =
-    document.getElementById("navPoints");
-
-  const profilePoints =
-    document.getElementById("profilePoints");
-
-  const pointBig =
-    document.getElementById("pointBig");
-
-
-  if (navPoints) {
-    navPoints.textContent = points;
-  }
-
-
-  if (profilePoints) {
-    profilePoints.textContent = points;
-  }
-
-
-  if (pointBig) {
-    pointBig.textContent = points;
-  }
-
-
-  alert(
-    "Berhasil mendapatkan +10 COD Point!"
-  );
-}
-
 
 // ======================================================
 // SAAT WEBSITE DIBUKA
