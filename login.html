@@ -160,7 +160,7 @@ document
     e.preventDefault();
 
     const email =
-        document.getElementById("email").value;
+        document.getElementById("email").value.trim();
 
     const password =
         document.getElementById("password").value;
@@ -168,13 +168,18 @@ document
     const message =
         document.getElementById("message");
 
-    message.textContent = "Sedang masuk...";
+    message.textContent =
+        "Sedang masuk...";
+
+    /* ==============================
+       LOGIN SUPABASE
+    ============================== */
 
     const { data, error } =
-    await window.supabaseClient.auth.signInWithPassword({
-        email: email,
-        password: password
-    });
+        await window.supabaseClient.auth.signInWithPassword({
+            email: email,
+            password: password
+        });
 
     if (error) {
 
@@ -184,16 +189,60 @@ document
         return;
     }
 
+
+    /* ==============================
+       CEK ROLE ADMIN
+    ============================== */
+
+    const {
+        data: isAdmin,
+        error: roleError
+    } =
+        await window.supabaseClient.rpc("is_admin");
+
+
+    if (roleError) {
+
+        console.error(roleError);
+
+        message.textContent =
+            "Login berhasil, tetapi gagal mengecek role.";
+
+        return;
+    }
+
+
+    /* ==============================
+       REDIRECT SESUAI ROLE
+    ============================== */
+
     message.textContent =
         "Login berhasil!";
 
+
     setTimeout(() => {
 
-        window.location.href = "index.html";
+        if (isAdmin === true) {
 
-    }, 1000);
+            window.location.href =
+                "admin.html";
+
+        } else {
+
+            window.location.href =
+                "index.html";
+
+        }
+
+    }, 800);
 
 });
+
+
+/* =================================
+   LUPA PASSWORD
+================================= */
+
 document
 .getElementById("forgotPassword")
 .addEventListener("click", async function(e) {
@@ -207,16 +256,21 @@ document
         document.getElementById("message");
 
     if (!email) {
+
         message.textContent =
             "Masukkan email terlebih dahulu.";
+
         return;
     }
 
     message.textContent =
         "Mengirim email reset password...";
 
+
     const { error } =
-        await window.supabaseClient.auth.resetPasswordForEmail(
+        await window.supabaseClient
+        .auth
+        .resetPasswordForEmail(
             email,
             {
                 redirectTo:
@@ -224,17 +278,20 @@ document
             }
         );
 
+
     if (error) {
+
         message.textContent =
             "Gagal mengirim reset password: " +
             error.message;
+
         return;
     }
 
+
     message.textContent =
         "Email reset password sudah dikirim. Silakan cek Gmail.";
-});
-</script>
 
-</body>
-</html>
+});
+
+</script>
