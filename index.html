@@ -21,12 +21,6 @@
         <button class="nav-link" data-page="jual" onclick="showPage('jual')">Jual Barang</button>
         <button class="nav-link" data-page="profil" onclick="showPage('profil')">Profil</button>
     
-          <a
-    href="#"
-    id="adminDashboardLink"
-    style="display:none;">
-    🛡️ Dashboard Admin
-</a>
       </nav>
       <button class="point-btn" onclick="showPage('profil')">⭐ <span id="navPoints">120</span> COD Point</button>
     </div>
@@ -34,6 +28,36 @@
 
   <main>
     <section id="home" class="page active">
+      <!-- =========================================
+     DASHBOARD ADMIN
+========================================= -->
+
+<section
+  id="adminDashboard"
+  style="display:none; margin-bottom:30px;"
+>
+  <div class="container content">
+
+    <div class="page-title">
+
+      <div class="pill">
+        🛡️ Khusus Admin
+      </div>
+
+      <h2>Dashboard Admin</h2>
+
+      <p>
+        Kelola barang yang diajukan oleh pengguna Seken.mlg.
+      </p>
+
+    </div>
+
+    <div id="adminMessage"></div>
+
+    <div id="adminPendingProducts"></div>
+
+  </div>
+</section>
       <div class="hero">
         <div class="container hero-grid">
           <div>
@@ -275,53 +299,470 @@
 </script>
   <script>
 
-(async function checkAdminMenu() {
+/* =========================================
+   DASHBOARD ADMIN DI BERANDA
+========================================= */
+
+async function loadAdminDashboard() {
+
+    const dashboard =
+        document.getElementById("adminDashboard");
+
+    const container =
+        document.getElementById("adminPendingProducts");
+
+    if (!dashboard || !container) {
+        return;
+    }
+
+    container.innerHTML =
+        "<p>Memuat barang pending...</p>";
+
+
+    const {
+        data: products,
+        error
+    } =
+        await window.supabaseClient
+        .from("products")
+        .select("*")
+        .eq("status", "pending")
+        .order("created_at", {
+            ascending: false
+        });
+
+
+    if (error) {
+
+        console.error(error);
+
+        container.innerHTML = `
+            <div class="form-card">
+                <p>
+                    Gagal memuat barang pending.
+                </p>
+            </div>
+        `;
+
+        return;
+    }
+
+
+    if (!products || products.length === 0) {
+
+        container.innerHTML = `
+            <div class="form-card">
+
+                <h3>
+                    Tidak ada barang pending
+                </h3>
+
+                <p>
+                    Semua barang sudah diperiksa.
+                </p>
+
+            </div>
+        `;
+
+        return;
+    }
+
+
+    container.innerHTML =
+        products.map(product => {
+
+            const image =
+                product.image_url
+                ? `
+                    <img
+                        src="${product.image_url}"
+                        alt="${product.name}"
+                        style="
+                            width:180px;
+                            height:140px;
+                            object-fit:cover;
+                            border-radius:12px;
+                        "
+                    >
+                `
+                : `
+                    <div
+                        style="
+                            width:180px;
+                            height:140px;
+                            border-radius:12px;
+                            background:#eee;
+                            display:flex;
+                            align-items:center;
+                            justify-content:center;
+                            font-size:40px;
+                        "
+                    >
+                        📦
+                    </div>
+                `;
+
+
+            const price =
+                Number(product.price || 0)
+                .toLocaleString("id-ID");
+
+
+            return `
+
+                <div
+                    class="form-card"
+                    style="
+                        margin-bottom:20px;
+                    "
+                >
+
+                    <div
+                        style="
+                            display:grid;
+                            grid-template-columns:
+                                180px 1fr;
+                            gap:20px;
+                            align-items:start;
+                        "
+                    >
+
+                        <div>
+                            ${image}
+                        </div>
+
+
+                        <div>
+
+                            <h3
+                                style="
+                                    margin-bottom:10px;
+                                "
+                            >
+                                ${product.name}
+                            </h3>
+
+
+                            <p>
+                                <b>Kategori:</b>
+                                ${product.category}
+                            </p>
+
+
+                            <p>
+                                <b>Harga:</b>
+                                Rp ${price}
+                            </p>
+
+
+                            <p>
+                                <b>Kondisi:</b>
+                                ${product.condition}
+                            </p>
+
+
+                            <p>
+                                <b>Lokasi COD:</b>
+                                ${product.location || "-"}
+                            </p>
+
+
+                            <p>
+                                <b>Penjual:</b>
+                                ${product.seller_name || "-"}
+                            </p>
+
+
+                            <p
+                                style="
+                                    margin-top:8px;
+                                "
+                            >
+                                <b>Deskripsi:</b>
+                                ${product.description || "-"}
+                            </p>
+
+
+                            <div
+                                style="
+                                    display:flex;
+                                    gap:10px;
+                                    margin-top:15px;
+                                    flex-wrap:wrap;
+                                "
+                            >
+
+                                <button
+                                    class="primary"
+                                    onclick="
+                                        approveProductFromHome(
+                                            '${product.id}'
+                                        )
+                                    "
+                                >
+                                    ✓ Setujui
+                                </button>
+
+
+                                <button
+                                    class="secondary"
+                                    onclick="
+                                        rejectProductFromHome(
+                                            '${product.id}'
+                                        )
+                                    "
+                                >
+                                    ✕ Tolak
+                                </button>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            `;
+
+        }).join("");
+}
+
+
+/* =========================================
+   SETUJUI BARANG DARI BERANDA
+========================================= */
+
+async function approveProductFromHome(productId) {
 
     const {
         data: {
             session
         }
-    } = await window.supabaseClient.auth.getSession();
+    } =
+        await window.supabaseClient
+        .auth
+        .getSession();
+
 
     if (!session) {
         return;
     }
 
+
     const {
         data: isAdmin,
-        error
-    } = await window.supabaseClient.rpc("is_admin");
+        error: roleError
+    } =
+        await window.supabaseClient
+        .rpc("is_admin");
 
-    if (error) {
-        console.error("Gagal mengecek role admin:", error);
+
+    if (roleError || isAdmin !== true) {
+
+        alert(
+            "Akses hanya untuk admin."
+        );
+
         return;
     }
 
+
+    const {
+        error
+    } =
+        await window.supabaseClient
+        .from("products")
+        .update({
+            status: "approved",
+            approved_by: session.user.id,
+            approved_at:
+                new Date().toISOString(),
+            rejection_reason: null
+        })
+        .eq("id", productId);
+
+
+    if (error) {
+
+        alert(
+            "Gagal menyetujui barang: " +
+            error.message
+        );
+
+        console.error(error);
+
+        return;
+    }
+
+
+    alert(
+        "Barang berhasil disetujui."
+    );
+
+
+    loadAdminDashboard();
+
+
+    if (typeof loadProducts === "function") {
+        loadProducts();
+    }
+
+}
+
+
+/* =========================================
+   TOLAK BARANG DARI BERANDA
+========================================= */
+
+async function rejectProductFromHome(productId) {
+
+    const reason =
+        prompt(
+            "Masukkan alasan penolakan barang:"
+        );
+
+
+    if (!reason || !reason.trim()) {
+        return;
+    }
+
+
+    const {
+        data: {
+            session
+        }
+    } =
+        await window.supabaseClient
+        .auth
+        .getSession();
+
+
+    if (!session) {
+        return;
+    }
+
+
+    const {
+        data: isAdmin,
+        error: roleError
+    } =
+        await window.supabaseClient
+        .rpc("is_admin");
+
+
+    if (roleError || isAdmin !== true) {
+
+        alert(
+            "Akses hanya untuk admin."
+        );
+
+        return;
+    }
+
+
+    const {
+        error
+    } =
+        await window.supabaseClient
+        .from("products")
+        .update({
+            status: "rejected",
+            approved_by: session.user.id,
+            approved_at: null,
+            rejection_reason:
+                reason.trim()
+        })
+        .eq("id", productId);
+
+
+    if (error) {
+
+        alert(
+            "Gagal menolak barang: " +
+            error.message
+        );
+
+        console.error(error);
+
+        return;
+    }
+
+
+    alert(
+        "Barang berhasil ditolak."
+    );
+
+
+    loadAdminDashboard();
+
+}
+
+
+/* =========================================
+   CEK DAN TAMPILKAN DASHBOARD ADMIN
+========================================= */
+
+async function showAdminDashboardIfNeeded() {
+
+    const {
+        data: {
+            session
+        }
+    } =
+        await window.supabaseClient
+        .auth
+        .getSession();
+
+
+    if (!session) {
+        return;
+    }
+
+
+    const {
+        data: isAdmin,
+        error
+    } =
+        await window.supabaseClient
+        .rpc("is_admin");
+
+
+    if (error) {
+
+        console.error(
+            "Gagal mengecek admin:",
+            error
+        );
+
+        return;
+    }
+
+
     if (isAdmin === true) {
 
-        const adminLink =
-            document.getElementById("adminDashboardLink");
+        const dashboard =
+            document.getElementById(
+                "adminDashboard"
+            );
 
-        if (adminLink) {
+        if (dashboard) {
 
-            adminLink.style.display = "inline-block";
+            dashboard.style.display =
+                "block";
 
-            adminLink.onclick = function(e) {
-
-                e.preventDefault();
-
-                window.location.href = "admin.html";
-
-            };
+            loadAdminDashboard();
 
         }
 
     }
 
-})();
+}
+
+
+showAdminDashboardIfNeeded();
 
 </script>
-
 <script src="script.js?v=3"></script>
 
 </body>
