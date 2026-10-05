@@ -20,6 +20,13 @@
         <button class="nav-link active" data-page="home" onclick="showPage('home')">Beranda</button>
         <button class="nav-link" data-page="jual" onclick="showPage('jual')">Jual Barang</button>
         <button class="nav-link" data-page="profil" onclick="showPage('profil')">Profil</button>
+    
+          <a
+    href="#"
+    id="adminDashboardLink"
+    style="display:none;">
+    🛡️ Dashboard Admin
+</a>
       </nav>
       <button class="point-btn" onclick="showPage('profil')">⭐ <span id="navPoints">120</span> COD Point</button>
     </div>
@@ -265,6 +272,54 @@
     }
 
   })();
+</script>
+  <script>
+
+(async function checkAdminMenu() {
+
+    const {
+        data: {
+            session
+        }
+    } = await window.supabaseClient.auth.getSession();
+
+    if (!session) {
+        return;
+    }
+
+    const {
+        data: isAdmin,
+        error
+    } = await window.supabaseClient.rpc("is_admin");
+
+    if (error) {
+        console.error("Gagal mengecek role admin:", error);
+        return;
+    }
+
+    if (isAdmin === true) {
+
+        const adminLink =
+            document.getElementById("adminDashboardLink");
+
+        if (adminLink) {
+
+            adminLink.style.display = "inline-block";
+
+            adminLink.onclick = function(e) {
+
+                e.preventDefault();
+
+                window.location.href = "admin.html";
+
+            };
+
+        }
+
+    }
+
+})();
+
 </script>
 
 <script src="script.js?v=3"></script>
