@@ -167,3 +167,23 @@
     font-size: 24px;
   }
 }
+/* ======================================================
+   PROFIL PENJUAL
+   ====================================================== */
+
+.seller-box {
+  margin-top: 20px;
+  padding: 18px;
+  background: #f4f8f4;
+  border: 1px solid #dce9dc;
+  border-radius: 14px;
+}
+
+.seller-box h3 {
+  margin: 0 0 12px;
+  font-size: 18px;
+}
+
+.seller-box p {
+  margin: 7px 0;
+}
