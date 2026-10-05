@@ -237,3 +237,16 @@
   }
 
 }
+/* =========================================
+   TOMBOL HAPUS BARANG
+========================================= */
+
+#myProducts .product-card button {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  width: 100%;
+  margin-top: 12px;
+  padding: 10px 15px;
+  cursor: pointer;
+}
