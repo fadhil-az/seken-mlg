@@ -131,10 +131,19 @@
 
     <div id="message"></div>
 
-    <div class="register">
-        Belum punya akun?
-        <a href="register.html">Daftar</a>
-    </div>
+<div style="text-align:center; margin-top:15px;">
+    <a
+        href="#"
+        id="forgotPassword"
+        style="color:#16834b; font-weight:bold; text-decoration:none;">
+        Lupa Password?
+    </a>
+</div>
+
+<div class="register">
+    Belum punya akun?
+    <a href="register.html">Daftar</a>
+</div>
 
 </div>
 
@@ -185,7 +194,46 @@ document
     }, 1000);
 
 });
+document
+.getElementById("forgotPassword")
+.addEventListener("click", async function(e) {
 
+    e.preventDefault();
+
+    const email =
+        document.getElementById("email").value.trim();
+
+    const message =
+        document.getElementById("message");
+
+    if (!email) {
+        message.textContent =
+            "Masukkan email terlebih dahulu.";
+        return;
+    }
+
+    message.textContent =
+        "Mengirim email reset password...";
+
+    const { error } =
+        await window.supabaseClient.auth.resetPasswordForEmail(
+            email,
+            {
+                redirectTo:
+                    "https://fadhil-az.github.io/seken-mlg/reset-password.html"
+            }
+        );
+
+    if (error) {
+        message.textContent =
+            "Gagal mengirim reset password: " +
+            error.message;
+        return;
+    }
+
+    message.textContent =
+        "Email reset password sudah dikirim. Silakan cek Gmail.";
+});
 </script>
 
 </body>
