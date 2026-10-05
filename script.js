@@ -60,33 +60,117 @@ function renderProducts() {
 
   const grid = document.getElementById("productGrid");
 
-  const searchInput = document.getElementById("searchInput");
+  if (!grid) return;
 
-  const search = searchInput
-    ? searchInput.value.toLowerCase()
-    : "";
+  const searchInput =
+    document.getElementById("searchInput");
+
+  const conditionFilter =
+    document.getElementById("conditionFilter");
+
+  const priceFilter =
+    document.getElementById("priceFilter");
+
+  const search =
+    searchInput
+      ? searchInput.value.trim().toLowerCase()
+      : "";
+
+  const condition =
+    conditionFilter
+      ? conditionFilter.value
+      : "Semua";
+
+  const price =
+    priceFilter
+      ? priceFilter.value
+      : "default";
+
 
   let filtered = products.filter(product => {
+
+    /* FILTER KATEGORI */
 
     const matchCategory =
       currentCategory === "Semua" ||
       product.category === currentCategory;
 
-    const matchSearch =
-      (product.name || "").toLowerCase().includes(search) ||
-      (product.description || "").toLowerCase().includes(search) ||
-      (product.location || "").toLowerCase().includes(search);
 
-    return matchCategory && matchSearch;
+    /* FILTER PENCARIAN */
+
+    const matchSearch =
+      (product.name || "")
+        .toLowerCase()
+        .includes(search) ||
+
+      (product.description || "")
+        .toLowerCase()
+        .includes(search) ||
+
+      (product.location || "")
+        .toLowerCase()
+        .includes(search);
+
+
+    /* FILTER KONDISI */
+
+    const matchCondition =
+      condition === "Semua" ||
+      product.condition === condition;
+
+
+    return (
+      matchCategory &&
+      matchSearch &&
+      matchCondition
+    );
+
   });
 
+
+  /* URUTKAN HARGA */
+
+  if (price === "low") {
+
+    filtered.sort(
+      (a, b) =>
+        Number(a.price || 0) -
+        Number(b.price || 0)
+    );
+
+  }
+
+  if (price === "high") {
+
+    filtered.sort(
+      (a, b) =>
+        Number(b.price || 0) -
+        Number(a.price || 0)
+    );
+
+  }
+
+
+  /* JIKA TIDAK ADA BARANG */
 
   if (filtered.length === 0) {
 
     grid.innerHTML = `
-      <div style="grid-column:1/-1;text-align:center;padding:40px;">
-        <h3>Belum ada barang</h3>
-        <p>Coba gunakan kata pencarian atau kategori lain.</p>
+      <div
+        style="
+          grid-column:1/-1;
+          text-align:center;
+          padding:40px;
+        "
+      >
+
+        <h3>Barang tidak ditemukan</h3>
+
+        <p>
+          Coba gunakan kata pencarian,
+          kondisi, atau kategori lain.
+        </p>
+
       </div>
     `;
 
@@ -94,10 +178,13 @@ function renderProducts() {
   }
 
 
+  /* TAMPILKAN BARANG */
+
   grid.innerHTML = filtered.map(product => {
 
     const price =
-      Number(product.price || 0).toLocaleString("id-ID");
+      Number(product.price || 0)
+      .toLocaleString("id-ID");
 
 
     return `
@@ -110,14 +197,12 @@ function renderProducts() {
 
           ${
             product.image_url
-
               ? `
                 <img
                   src="${product.image_url}"
                   alt="${product.name}"
                 >
               `
-
               : `
                 <div class="no-image">
                   📦
@@ -134,21 +219,17 @@ function renderProducts() {
             ${product.category}
           </span>
 
-
           <h3>
             ${product.name}
           </h3>
-
 
           <strong class="product-price">
             Rp ${price}
           </strong>
 
-
           <p>
             ${product.condition}
           </p>
-
 
           <small>
             📍 ${product.location || "Malang"}
@@ -160,8 +241,59 @@ function renderProducts() {
     `;
 
   }).join("");
+
+}
+function applyFilters() {
+  renderProducts();
 }
 
+
+function resetFilters() {
+
+  const searchInput =
+    document.getElementById("searchInput");
+
+  const conditionFilter =
+    document.getElementById("conditionFilter");
+
+  const priceFilter =
+    document.getElementById("priceFilter");
+
+
+  if (searchInput) {
+    searchInput.value = "";
+  }
+
+
+  if (conditionFilter) {
+    conditionFilter.value = "Semua";
+  }
+
+
+  if (priceFilter) {
+    priceFilter.value = "default";
+  }
+
+
+  currentCategory = "Semua";
+
+
+  document.querySelectorAll(".cat").forEach(button => {
+    button.classList.remove("active");
+  });
+
+
+  const allButton =
+    document.querySelectorAll(".cat")[0];
+
+
+  if (allButton) {
+    allButton.classList.add("active");
+  }
+
+
+  renderProducts();
+}
 
 // ======================================================
 // FILTER KATEGORI
