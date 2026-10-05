@@ -799,13 +799,8 @@ async function loadProfile() {
       return;
     }
 
-
-    // ==================================================
-    // TAMPILKAN DAFTAR BARANG
-    // ==================================================
-
-    // ==================================================
-// TAMPILKAN DAFTAR BARANG + STATUS
+// ==================================================
+// TAMPILKAN DAFTAR BARANG + STATUS + HAPUS
 // ==================================================
 
 container.innerHTML =
@@ -902,6 +897,20 @@ container.innerHTML =
 
           ${rejectionReason}
 
+          <!-- TOMBOL HAPUS -->
+          <button
+            type="button"
+            class="secondary"
+            style="
+              margin-top:12px;
+              width:100%;
+              color:#c0392b;
+            "
+            onclick="event.stopPropagation(); deleteProduct('${product.id}')"
+          >
+            🗑️ Hapus Barang
+          </button>
+
         </div>
 
       </article>
@@ -919,7 +928,81 @@ container.innerHTML =
   }
 }
 
+// ======================================================
+// HAPUS BARANG
+// ======================================================
 
+async function deleteProduct(productId) {
+
+  const confirmDelete =
+    confirm(
+      "Apakah kamu yakin ingin menghapus barang ini?"
+    );
+
+  if (!confirmDelete) {
+    return;
+  }
+
+  try {
+
+    // Cek user yang sedang login
+    const {
+      data: { user },
+      error: userError
+    } = await window.supabaseClient.auth.getUser();
+
+    if (userError || !user) {
+      alert("Silakan login terlebih dahulu.");
+      return;
+    }
+
+    // Hapus barang milik user
+    const {
+      error
+    } = await window.supabaseClient
+      .from("products")
+      .delete()
+      .eq("id", productId)
+      .eq("seller_id", user.id);
+
+    if (error) {
+
+      console.error(
+        "Gagal menghapus barang:",
+        error
+      );
+
+      alert(
+        "Barang gagal dihapus:\n" +
+        error.message
+      );
+
+      return;
+    }
+
+    alert(
+      "Barang berhasil dihapus."
+    );
+
+    // Muat ulang profil
+    await loadProfile();
+
+    // Muat ulang produk di halaman utama
+    await loadProducts();
+
+  } catch (error) {
+
+    console.error(
+      "Error deleteProduct:",
+      error
+    );
+
+    alert(
+      "Terjadi kesalahan saat menghapus barang."
+    );
+
+  }
+}
 // ======================================================
 // EDIT PROFILE
 // ======================================================
