@@ -199,12 +199,40 @@ async function showDetail(id) {
   const detail = document.getElementById("detailContent");
   const price = Number(product.price || 0).toLocaleString("id-ID");
 
+  // Ambil data profil penjual
+  let seller = null;
+
+  if (product.seller_id) {
+    const { data, error } = await window.supabaseClient
+      .from("profiles")
+      .select("name, phone, location")
+      .eq("id", product.seller_id)
+      .maybeSingle();
+
+    if (error) {
+      console.error("Gagal mengambil profil penjual:", error);
+    } else {
+      seller = data;
+    }
+  }
+
+  const sellerName =
+    seller?.name ||
+    product.seller_name ||
+    "Penjual Seken.mlg";
+
+  const sellerLocation =
+    seller?.location ||
+    product.location ||
+    "Malang, Jawa Timur";
+
   detail.innerHTML = `
     <button class="secondary" onclick="showPage('home')">
       ← Kembali
     </button>
 
     <div class="detail-card">
+
       <div class="detail-image">
         ${
           product.image_url
@@ -214,17 +242,43 @@ async function showDetail(id) {
       </div>
 
       <div class="detail-info">
-        <span class="product-category">${product.category}</span>
+
+        <span class="product-category">
+          ${product.category}
+        </span>
 
         <h1>${product.name}</h1>
 
         <h2>Rp ${price}</h2>
 
-        <p><b>Kondisi:</b> ${product.condition}</p>
+        <p>
+          <b>Kondisi:</b>
+          ${product.condition}
+        </p>
 
-        <p><b>Lokasi:</b> ${product.location || "Malang"}</p>
+        <p>
+          <b>Lokasi:</b>
+          ${product.location || "Malang"}
+        </p>
 
-        <p>${product.description || "Tidak ada deskripsi."}</p>
+        <p>
+          ${product.description || "Tidak ada deskripsi."}
+        </p>
+
+        <!-- PROFIL PENJUAL -->
+        <div class="seller-box">
+
+          <h3>👤 Penjual</h3>
+
+          <p>
+            <b>${sellerName}</b>
+          </p>
+
+          <p>
+            📍 ${sellerLocation}
+          </p>
+
+        </div>
 
         <button
           class="primary"
@@ -232,6 +286,7 @@ async function showDetail(id) {
           onclick="contactSeller('${product.id}')">
           💬 Hubungi Penjual
         </button>
+
       </div>
     </div>
   `;
