@@ -212,32 +212,20 @@ document
     }
 
 
-    /* ==============================
-       REDIRECT SESUAI ROLE
-    ============================== */
+/* ==============================
+   REDIRECT
+============================== */
 
-    message.textContent =
-        "Login berhasil!";
+message.textContent =
+    "Login berhasil!";
 
+setTimeout(() => {
 
-    setTimeout(() => {
+    window.location.href =
+        "index.html";
 
-        if (isAdmin === true) {
-
-            window.location.href =
-                "admin.html";
-
-        } else {
-
-            window.location.href =
-                "index.html";
-
-        }
-
-    }, 800);
-
+}, 800);
 });
-
 
 /* =================================
    LUPA PASSWORD
