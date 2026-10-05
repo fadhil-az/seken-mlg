@@ -812,6 +812,30 @@ async function editProfile() {
 
 
 // ======================================================
+// LOGOUT
+// ======================================================
+
+async function logout() {
+
+  const { error } =
+    await window.supabaseClient.auth.signOut();
+
+  if (error) {
+
+    alert(
+      "Gagal logout: " +
+      error.message
+    );
+
+    return;
+  }
+
+  window.location.href =
+    "login.html";
+}
+
+
+// ======================================================
 // TUTUP MODAL EDIT PROFILE
 // ======================================================
 
