@@ -250,3 +250,36 @@
   padding: 10px 15px;
   cursor: pointer;
 }
+/* =========================================
+   NAVBAR MOBILE
+========================================= */
+
+@media (max-width: 800px) {
+
+  .navbar {
+    height: auto;
+  }
+
+  .nav-inner {
+    flex-wrap: wrap;
+    padding-top: 12px;
+    padding-bottom: 12px;
+  }
+
+  .nav-inner nav {
+    display: flex !important;
+    width: 100%;
+    justify-content: center;
+    gap: 6px;
+    margin-top: 10px;
+  }
+
+  .nav-link {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    padding: 9px 14px;
+    font-size: 14px;
+  }
+
+}
